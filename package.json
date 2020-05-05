@@ -1,0 +1,23 @@
+{
+    "name": "wp-graphql-cache",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "prettier": "prettier --write \"src/**/*.php\""
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/valu-digital/wp-graphql-cache.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/valu-digital/wp-graphql-cache/issues"
+    },
+    "homepage": "https://github.com/valu-digital/wp-graphql-cache#readme",
+    "devDependencies": {
+        "@prettier/plugin-php": "^0.14.0",
+        "prettier": "^2.0.5"
+    }
+}
