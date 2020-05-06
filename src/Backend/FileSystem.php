@@ -21,37 +21,75 @@ class FileSystem extends AbstractBackend
         return "{$this->base_directory}/$zone/$key";
     }
 
-    function set(string $zone, string $key, $data, $expire = null): void
+    protected function write_file(string $zone, string $key, string $contents)
     {
         $full_path = $this->get_path($zone, $key);
-        mkdir(dirname($full_path), 0700, true);
-        file_put_contents($full_path, serialize($data), LOCK_EX);
+        $dir = dirname($full_path);
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0700, true);
+        }
+
+        file_put_contents($full_path, $contents, LOCK_EX);
+
         chmod($full_path, 0600);
-        error_log("Writing cache $full_path");
     }
 
-    function get(string $zone, string $key): ?CachedValue
+    protected function read_file(string $zone, string $key): ?string
     {
         $full_path = $this->get_path($zone, $key);
 
         // it is cool to not exists
-        $data = @file_get_contents($full_path);
+        $contents = @file_get_contents($full_path);
 
-        if (false === $data) {
+        if (false === $contents) {
             return null;
         }
 
-        error_log("HIT $full_path");
-        return new CachedValue(unserialize($data));
+        return $contents;
     }
 
-    function delete(string $zone, string $key): boolean
+    function set(
+        string $zone,
+        string $key,
+        CachedValue $cached_value,
+        $expire = null
+    ): void {
+        $contents = serialize($cached_value);
+        $this->write_file($zone, $key, $contents);
+    }
+
+    function get(string $zone, string $key): ?CachedValue
     {
+        $contents = $this->read_file($zone, $key);
+        if (null === $contents) {
+            return null;
+        }
+
+        $cached_value = unserialize($contents);
+
+        if ($cached_value instanceof CachedValue) {
+            return $cached_value;
+        }
+
+        return null;
+    }
+
+    function delete(string $zone, string $key): bool
+    {
+        $full_path = $this->get_path($zone, $key);
+        return @unlink($full_path);
+    }
+
+    function clear_zone(string $zone): bool
+    {
+        // XXX
         return false;
     }
 
-    function delete_zone(string $zone): boolean
+    function clear(): bool
     {
+        // XXX
         return false;
     }
 }

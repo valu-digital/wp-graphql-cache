@@ -12,9 +12,10 @@ class CacheManager
 
     static function init()
     {
-        error_log('boo');
-
-        self::$backend = new Backend\FileSystem();
+        self::$backend = apply_filters(
+            'graphql_cache_backend',
+            new Backend\FileSystem()
+        );
     }
 
     static function register_graphql_field_cache($config)
@@ -24,8 +25,29 @@ class CacheManager
         }
 
         $field = new FieldCache($config);
-        $field->activate();
         self::$fields[] = $field;
+
+        $is_active = apply_filters('graphql_cache_active', true);
+
+        if ($is_active) {
+            $field->activate();
+        }
+
         return $field;
     }
+
+    function clear_zone(string $zone): bool
+    {
+        return self::$backend->clear_zone($zone);
+    }
+
+    function clear(): bool
+    {
+        return self::$backend->clear();
+    }
+}
+
+function register_graphql_field_cache($config)
+{
+    CacheManager::register_graphql_field_cache($config);
 }

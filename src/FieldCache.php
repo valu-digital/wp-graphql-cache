@@ -4,20 +4,57 @@ declare(strict_types=1);
 
 namespace WPGraphQL\Extensions\Cache;
 
+/**
+ * Class that takes care of caching individual field per graphql request
+ */
 class FieldCache
 {
+    /**
+     * The zone name this field belongs to
+     */
     protected $zone = null;
+
+    /**
+     * GraphQL Query name this cache should match against
+     */
     protected $query_name = null;
+
+    /**
+     * Root field name to match on
+     */
     protected $field_name = null;
+
+    /**
+     * Expire cached value after given seconds
+     */
     protected $expire = null;
+
+    /**
+     * @type Backend\AbstractBackend
+     */
     protected $backend = null;
 
     /**
+     * Restored value from the cache backend
+     *
      * @type CachedValue
      */
     protected $cached_value = null;
+
+    /**
+     * True when running againts matched field
+     */
     protected $match = false;
+
+    /**
+     * The cache key
+     */
     protected $key = null;
+
+    /**
+     * The current graphql query as string
+     */
+    protected $query = null;
 
     function __construct($config)
     {
@@ -26,18 +63,28 @@ class FieldCache
         $this->field_name = $config['field_name'];
         $this->backend = $config['backend'];
 
-        $this->expire = $config['expire'] ?? null;
+        if (!empty($config['expire'])) {
+            $this->expire = intval($config['expire']);
+        }
     }
 
     function activate()
     {
+        add_action(
+            'do_graphql_request',
+            [$this, '__action_do_graphql_request'],
+            2,
+            10
+        );
+
         add_filter(
             'graphql_pre_resolve_field',
             [$this, '__filter_graphql_pre_resolve_field'],
             10,
             9
         );
-        add_action(
+
+        add_filter(
             'graphql_request_results',
             [$this, '__filter_graphql_return_response'],
             // Use large value as this should be the last response filter
@@ -48,24 +95,12 @@ class FieldCache
         );
     }
 
-    function get_backend(): Backend\AbstractBackend
+    function __action_do_graphql_request(string $query, string $query_name)
     {
-        return $this->backend;
-    }
-
-    function has_hit()
-    {
-        return $this->cached_value instanceof CachedValue;
-    }
-
-    function get_value()
-    {
-        if (!$this->has_hit()) {
-            throw new \Error(
-                'No cached value available. Check first with "has_hit()"'
-            );
+        // Capture query if its name matches
+        if ($query_name === $this->query_name) {
+            $this->query = $query;
         }
-        return $this->cached_value->data;
     }
 
     function __filter_graphql_pre_resolve_field(
@@ -79,23 +114,35 @@ class FieldCache
         $field,
         $field_resolver
     ) {
-        // XXX Check query name
-
-        // XXX only check root field
-        if ($this->field_name !== $field_key) {
+        // No query, no query name match
+        if (!$this->query) {
             return $nil;
         }
 
+        // Only interested in root queries
+        if (count($info->path) !== 1) {
+            return $nil;
+        }
+
+        if ($this->field_name !== $info->path[0]) {
+            return $nil;
+        }
+
+        // Mark as mached ie. this field should be cached
         $this->match = true;
 
-        // XXX Add hash of  args
-        $this->key = "graphql-field:$this->query_name:$this->field_name";
+        $query_name = Utils::sanitize($this->query_name);
+        $field_name = Utils::sanitize($this->field_name);
+        $args_hash = Utils::hash(Utils::stable_string($args));
+        $query_hash = Utils::hash($this->query);
+        $user_id = get_current_user_id();
 
-        // Read value from cache
-        $this->cached_value = $this->backend->get($this->zone, $this->key);
+        $this->key = "{$query_name}-${field_name}-${user_id}-{$query_hash}-${args_hash}";
 
-        // Completely skip resolving this field if we got cache hit.
-        // We'll use the actual cached value in the graphql_return_response filter.
+        $this->read_cache();
+
+        // Completely skip resolving this field if we got cache hit. We'll use
+        // the actual cached value in the graphql_return_response filter later.
         if ($this->has_hit()) {
             return null;
         }
@@ -117,18 +164,112 @@ class FieldCache
 
         // Cache miss. Write the field to the cache.
         if (!$this->has_hit()) {
+            Utils::log('MISS ' . $this->get_cache_key());
             $this->backend->set(
                 $this->zone,
-                $this->key,
-                $response->data[$this->field_name],
+                $this->get_cache_key(),
+                new CachedValue($response->data[$this->field_name]),
                 $this->expire
             );
             return $response;
         }
 
+        Utils::log('HIT ' . $this->get_cache_key());
         // Cache hit. Restore value from the cache to the skipped field
-        $response->data[$this->field_name] = $this->get_value();
+        $response->data[$this->field_name] = $this->get_cached_data();
 
         return $response;
+    }
+
+    /**
+     * Get the backend instance
+     */
+    function get_backend(): Backend\AbstractBackend
+    {
+        return $this->backend;
+    }
+
+    /**
+     * Retrns true when the field cache has warm cache hit
+     */
+    function has_hit(): boolean
+    {
+        return $this->cached_value instanceof CachedValue;
+    }
+
+    /**
+     * Get the raw cached out of the CachedValue container
+     */
+    function get_cached_data()
+    {
+        if (!$this->has_hit()) {
+            throw new \Error(
+                'No cached value available. Check first with "FieldCache#has_hit()"'
+            );
+        }
+
+        return $this->cached_value->get_data();
+    }
+
+    /**
+     * Get the cache key
+     */
+    function get_cache_key(): string
+    {
+        if (null === $this->key) {
+            throw new \Error(
+                'Cache key not generated yet. FieldCache#get_cache_key() can be called only after the graphql_pre_resolve_field filter'
+            );
+        }
+
+        return $this->key;
+    }
+
+    /**
+     * Read data from the cache backend but discard immediately it if has been expired
+     */
+    function read_cache()
+    {
+        $this->cached_value = $this->backend->get(
+            $this->zone,
+            $this->get_cache_key()
+        );
+
+        if ($this->cached_value && $this->has_expired()) {
+            Utils::log('EXPIRED ' . $this->get_cache_key());
+            $this->delete();
+        }
+    }
+
+    /**
+     * Delete the current key from the cache
+     */
+    function delete()
+    {
+        $this->cached_value = null;
+        $this->backend->delete($this->zone, $this->get_cache_key());
+    }
+
+    /**
+     * Clear the used zone from the backend
+     */
+    function clear_zone()
+    {
+        $this->cached_value = null;
+        $this->backend->clear_zone($this->zone);
+    }
+
+    /**
+     * Check if the value has been expired
+     */
+    function has_expired(): bool
+    {
+        if (empty($this->expire)) {
+            return false;
+        }
+
+        $age = microtime(true) - $this->cached_value->get_created();
+        $max_age = $this->expire;
+        return $age > $max_age;
     }
 }
