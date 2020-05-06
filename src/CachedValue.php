@@ -7,12 +7,12 @@ namespace WPGraphQL\Extensions\Cache;
 /**
  * Value container for cached values to distinguish them from null and false.
  */
-class Value
+class CachedValue
 {
-    public $value = null;
+    public $data = null;
 
-    function __construct($value)
+    function __construct($data)
     {
-        $this->value = $value;
+        $this->data = $data;
     }
 }
