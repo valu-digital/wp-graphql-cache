@@ -30,9 +30,12 @@ class FileSystem extends AbstractBackend
             mkdir($dir, 0700, true);
         }
 
-        file_put_contents($full_path, $contents, LOCK_EX);
-
+        // First intialize with an empty file which cannot be read by anyone
+        // else
+        touch($full_path);
         chmod($full_path, 0600);
+
+        file_put_contents($full_path, $contents, LOCK_EX);
     }
 
     protected function read_file(string $zone, string $key): ?string
@@ -62,7 +65,7 @@ class FileSystem extends AbstractBackend
     function get(string $zone, string $key): ?CachedValue
     {
         $contents = $this->read_file($zone, $key);
-        if (null === $contents) {
+        if (empty($contents)) {
             return null;
         }
 
