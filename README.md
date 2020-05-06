@@ -85,4 +85,4 @@ TODO
 ### Custom Backends
 
 A custom backend can be also returned as long as it extends from
-`\WPGraphQL\Extensions\Cache\Backend\AbstrackBackend`.
+`\WPGraphQL\Extensions\Cache\Backend\AbstractBackend`.

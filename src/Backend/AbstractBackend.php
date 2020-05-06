@@ -12,7 +12,7 @@ use WPGraphQL\Extensions\Cache\CachedValue;
 abstract class AbstractBackend
 {
     /**
-     * Write data to the cache with to given zone and key.
+     * Write data to the cache with the given zone and key.
      *
      * The $expire param is only for backends that can automatically handle
      * expirations such as Redis. If the backend type does not support
