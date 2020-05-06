@@ -47,8 +47,8 @@ The zone can be cleared with `CacheManager::clear_zone()`
 
 ```php
 /**
- * Clear the cache for the zone 'menus' where the 'menuItems' is cached to when
- * the menus are updated
+ * Clear the zone 'menus' where the 'menuItems' is cached when the menus are
+ * updated
  */
 add_action('wp_update_nav_menu', function () {
     CacheManager::clear_zone('menus');
