@@ -192,7 +192,7 @@ class FieldCache
     /**
      * Retrns true when the field cache has warm cache hit
      */
-    function has_hit(): boolean
+    function has_hit(): bool
     {
         return $this->cached_value instanceof CachedValue;
     }
