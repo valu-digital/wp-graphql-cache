@@ -2,7 +2,7 @@
 
 class HttpFieldCacheCest
 {
-    public function testTitleExample(FunctionalTester $I)
+    public function testCacheStatusHeaders(FunctionalTester $I)
     {
         shell_exec('rm -rf /tmp/wp-graphql-cache/');
 
