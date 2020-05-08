@@ -95,7 +95,7 @@ class FieldCache
         );
     }
 
-    function __action_do_graphql_request(string $query, string $query_name)
+    function __action_do_graphql_request(string $query, $query_name)
     {
         // Capture query if its name matches
         if ($query_name === $this->query_name) {
