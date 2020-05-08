@@ -182,4 +182,73 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
         // Dong zone was cleard so this is updated
         $this->assertEquals('Updated Dong', $actual['data']['dong']['title']);
     }
+
+    public function testCacheIsNotSharedBetweenUsers()
+    {
+        CacheManager::register_graphql_field_cache([
+            'zone' => 'test',
+            'query_name' => 'getPosts',
+            'field_name' => 'post',
+        ]);
+
+        $user1 = $this->factory()->user->create();
+        $user2 = $this->factory()->user->create();
+
+        $post_id = self::factory()->post->create([
+            'post_title' => 'A Post',
+        ]);
+
+        $query = '
+		query getPosts( $postId: ID! ) {
+		  post( id: $postId, idType: DATABASE_ID ) {
+			title
+          }
+ 		}
+        ';
+
+        // Cache the query for user1
+
+        wp_set_current_user($user1);
+
+        $actual = graphql([
+            'query' => $query,
+            'operationname' => 'getPosts',
+            'variables' => [
+                'postId' => $post_id,
+            ],
+        ]);
+        $this->assertArrayNotHasKey('errors', $actual, print_r($actual, true));
+        $this->assertEquals('A Post', $actual['data']['post']['title']);
+
+        wp_update_post([
+            'ID' => $post_id,
+            'post_title' => 'Updated post',
+        ]);
+
+        wp_set_current_user($user2);
+
+        $actual = graphql([
+            'query' => $query,
+            'operationname' => 'getPosts',
+            'variables' => [
+                'postId' => $post_id,
+            ],
+        ]);
+        $this->assertArrayNotHasKey('errors', $actual, print_r($actual, true));
+        // User2 sees the update post
+        $this->assertEquals('Updated post', $actual['data']['post']['title']);
+
+        wp_set_current_user($user1);
+
+        $actual = graphql([
+            'query' => $query,
+            'operationname' => 'getPosts',
+            'variables' => [
+                'postId' => $post_id,
+            ],
+        ]);
+        $this->assertArrayNotHasKey('errors', $actual, print_r($actual, true));
+        // But user1 still sees the original from cache
+        $this->assertEquals('A Post', $actual['data']['post']['title']);
+    }
 }
