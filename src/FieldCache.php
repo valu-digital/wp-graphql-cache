@@ -9,6 +9,10 @@ namespace WPGraphQL\Extensions\Cache;
  */
 class FieldCache
 {
+    ////////////////////////
+    // CONFIG PROPERTIES  //
+    ////////////////////////
+
     /**
      * The zone name this field belongs to
      */
@@ -33,6 +37,10 @@ class FieldCache
      * @type Backend\AbstractBackend
      */
     protected $backend = null;
+
+    ///////////////////////
+    // STATE PROPERTIES  //
+    ///////////////////////
 
     /**
      * Restored value from the cache backend
@@ -159,6 +167,16 @@ class FieldCache
         $query,
         $variables
     ) {
+        $response = $this->respond($response);
+        $this->reset_state();
+        return $response;
+    }
+
+    /**
+     * Handle the final graphql reponse object
+     */
+    function respond($response)
+    {
         if (!$this->match) {
             return $response;
         }
@@ -172,6 +190,18 @@ class FieldCache
         $this->cache_field_from_response($response);
 
         return $response;
+    }
+
+    /**
+     * Reset instance state so this instance can be reused with multiple
+     * graphql() calls
+     */
+    function reset_state()
+    {
+        $this->cached_value = null;
+        $this->key = null;
+        $this->query = null;
+        $this->match = false;
     }
 
     /**
