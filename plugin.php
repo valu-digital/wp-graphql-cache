@@ -10,10 +10,3 @@
 namespace WPGraphQL\Extensions\Cache;
 
 CacheManager::init();
-
-// Cache::register_graphql_field_cache( [
-// 	'group' => 'ding',
-// 	'queryName' => 'Dongs',
-// 	'fieldName' => 'menuItems',
-// 	'expire' => 60 * 5,
-// ] );
