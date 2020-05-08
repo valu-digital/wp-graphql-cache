@@ -16,6 +16,11 @@ class CacheManager
             'graphql_cache_backend',
             new Backend\FileSystem()
         );
+
+        add_action('graphql_response_set_headers', [
+            self::class,
+            '__action_graphql_response_set_headers',
+        ]);
     }
 
     static function register_graphql_field_cache($config)
@@ -34,6 +39,27 @@ class CacheManager
         }
 
         return $field;
+    }
+
+    static function __action_graphql_response_set_headers()
+    {
+        $value = [];
+
+        foreach (self::$fields as $field) {
+            if (!$field->has_match()) {
+                continue;
+            }
+
+            if ($field->has_hit()) {
+                $value[] = 'HIT:' . $field->get_field_name();
+            } else {
+                $value[] = 'MISS:' . $field->get_field_name();
+            }
+        }
+
+        $value = implode(', ', $value);
+
+        header("x-graphql-field-cache: $value");
     }
 
     static function clear_zone(string $zone): bool

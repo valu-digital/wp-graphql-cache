@@ -168,7 +168,14 @@ class FieldCache
         $variables
     ) {
         $response = $this->respond($response);
-        $this->reset_state();
+
+        // Reset state only if this graphql request via PHP using graphql()
+        // because only in that case this instance is reused. For HTTP requests
+        // we want to keep the state around so we can set the status response
+        // headers
+        if (!is_graphql_http_request()) {
+            $this->reset_state();
+        }
         return $response;
     }
 
@@ -264,6 +271,22 @@ class FieldCache
     function has_hit(): bool
     {
         return $this->cached_value instanceof CachedValue;
+    }
+
+    /**
+     * Returns true when this field should be cached
+     */
+    function has_match(): bool
+    {
+        return $this->match;
+    }
+
+    /**
+     * Return the name of the cached field name
+     */
+    function get_field_name()
+    {
+        return $this->field_name;
     }
 
     /**

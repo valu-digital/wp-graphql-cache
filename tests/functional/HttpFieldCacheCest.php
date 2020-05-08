@@ -4,6 +4,8 @@ class HttpFieldCacheCest
 {
     public function testTitleExample(FunctionalTester $I)
     {
+        shell_exec('rm -rf /tmp/wp-graphql-cache/');
+
         $post_id = $I->havePostInDatabase(['post_title' => 'Test Post']);
 
         $query = '
@@ -33,6 +35,7 @@ class HttpFieldCacheCest
                 ],
             ],
         ]);
+        $I->seeHttpHeader('x-graphql-field-cache', 'MISS:post');
 
         $I->updateInDatabase(
             $I->grabPostsTableName(),
@@ -59,5 +62,6 @@ class HttpFieldCacheCest
                 ],
             ],
         ]);
+        $I->seeHttpHeader('x-graphql-field-cache', 'HIT:post');
     }
 }
