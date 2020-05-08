@@ -2,3 +2,5 @@ node_modules
 vendor
 .wp-install
 .env
+tests/_output/
+composer.lock
