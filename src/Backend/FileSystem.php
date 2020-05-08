@@ -86,13 +86,28 @@ class FileSystem extends AbstractBackend
 
     function clear_zone(string $zone): bool
     {
-        // XXX
-        return false;
+        $dir = $this->base_directory . "/$zone";
+        $deleted_something = self::rmdir_r($dir);
+
+        if (is_dir($dir)) {
+            rmdir($dir);
+            $deleted_something = true;
+        }
+
+        return $deleted_something;
     }
 
     function clear(): bool
     {
-        if (!is_dir($this->base_directory)) {
+        return self::rmdir_r($this->base_directory);
+    }
+
+    /**
+     * Recursively delete contents of a directory leaving the directory itself
+     */
+    static function rmdir_r($dir)
+    {
+        if (!is_dir($dir)) {
             return false;
         }
 
@@ -100,7 +115,7 @@ class FileSystem extends AbstractBackend
 
         $files = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator(
-                $this->base_directory,
+                $dir,
                 \RecursiveDirectoryIterator::SKIP_DOTS
             ),
             \RecursiveIteratorIterator::CHILD_FIRST
