@@ -92,7 +92,26 @@ class FileSystem extends AbstractBackend
 
     function clear(): bool
     {
-        // XXX
-        return false;
+        if (!is_dir($this->base_directory)) {
+            return false;
+        }
+
+        $deleted_something = false;
+
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(
+                $this->base_directory,
+                \RecursiveDirectoryIterator::SKIP_DOTS
+            ),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($files as $fileinfo) {
+            $todo = $fileinfo->isDir() ? 'rmdir' : 'unlink';
+            $deleted_something = true;
+            $todo($fileinfo->getRealPath());
+        }
+
+        return $deleted_something;
     }
 }
