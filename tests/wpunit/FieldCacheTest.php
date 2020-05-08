@@ -30,12 +30,12 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
         ]);
 
         $query = '
-		query getPosts( $postId: ID! ) {
+		query getPosts( $postId: ID!, $otherPostId: ID! ) {
 		  post( id: $postId, idType: DATABASE_ID ) {
 			title
           }
 
-		  otherPost: post( id: $postId, idType: DATABASE_ID ) {
+		  otherPost: post( id: $otherPostId, idType: DATABASE_ID ) {
 			title
 		  }
  		}
@@ -46,12 +46,19 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
             'operationname' => 'getPosts',
             'variables' => [
                 'postId' => $post_id,
+                'otherPostId' => $other_post_id,
             ],
         ]);
 
         // Reponds correctly on cache miss
         $this->assertArrayNotHasKey('errors', $actual, print_r($actual, true));
         $this->assertEquals('A Post', $actual['data']['post']['title']);
+
+        // Unrelated field is not touched
+        $this->assertEquals(
+            'The Other Post',
+            $actual['data']['otherPost']['title']
+        );
 
         wp_update_post([
             'ID' => $post_id,
@@ -63,12 +70,18 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
             'operationname' => 'getPosts',
             'variables' => [
                 'postId' => $post_id,
+                'otherPostId' => $other_post_id,
             ],
         ]);
 
         // Responds with the same data even when the post is updated
         $this->assertArrayNotHasKey('errors', $actual, print_r($actual, true));
         $this->assertEquals('A Post', $actual['data']['post']['title']);
+        // Unrelated field is not touched
+        $this->assertEquals(
+            'The Other Post',
+            $actual['data']['otherPost']['title']
+        );
 
         // Wait for the cache to expire
         sleep(2);
@@ -78,12 +91,19 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
             'operationname' => 'getPosts',
             'variables' => [
                 'postId' => $post_id,
+                'otherPostId' => $other_post_id,
             ],
         ]);
 
         // Cache responds with updated data after expiration
         $this->assertArrayNotHasKey('errors', $actual, print_r($actual, true));
         $this->assertEquals('Updated post', $actual['data']['post']['title']);
+
+        // Unrelated field is not touched
+        $this->assertEquals(
+            'The Other Post',
+            $actual['data']['otherPost']['title']
+        );
     }
 
     public function testCanCacheMultipleFieldsWithZones()
