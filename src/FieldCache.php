@@ -97,7 +97,7 @@ class FieldCache
 
     function __action_do_graphql_request(string $query, $query_name)
     {
-        // Capture query if its name matches
+        // Capture query if its name matches with configured field cache
         if ($query_name === $this->query_name) {
             $this->query = $query;
         }
@@ -124,6 +124,7 @@ class FieldCache
             return $nil;
         }
 
+        // Check it matches with configured field name
         if ($this->field_name !== $info->path[0]) {
             return $nil;
         }
@@ -162,21 +163,59 @@ class FieldCache
             return $response;
         }
 
-        // Cache miss. Write the field to the cache.
-        if (!$this->has_hit()) {
-            Utils::log('MISS ' . $this->get_cache_key());
-            $this->backend->set(
-                $this->zone,
-                $this->get_cache_key(),
-                new CachedValue($response->data[$this->field_name]),
-                $this->expire
-            );
-            return $response;
+        if ($this->has_hit()) {
+            Utils::log('HIT ' . $this->get_cache_key());
+            return $this->respond_with_cache($response);
         }
 
-        Utils::log('HIT ' . $this->get_cache_key());
-        // Cache hit. Restore value from the cache to the skipped field
-        $response->data[$this->field_name] = $this->get_cached_data();
+        Utils::log('MISS ' . $this->get_cache_key());
+        $this->cache_field_from_response($response);
+
+        return $response;
+    }
+
+    /**
+     * Save the field data from the response the cache
+     */
+    function cache_field_from_response($response)
+    {
+        $data = null;
+
+        if (is_array($response)) {
+            // The reponse is array when called from PHP using the graphql() function
+            if (!isset($response['data'][$this->field_name])) {
+                return;
+            }
+            $data = $response['data'][$this->field_name];
+        } else {
+            // From HTTP request the respones is an object with data property
+            if (!isset($response->data[$this->field_name])) {
+                return;
+            }
+            $data = $response->data[$this->field_name];
+        }
+
+        $this->backend->set(
+            $this->zone,
+            $this->get_cache_key(),
+            new CachedValue($data),
+            $this->expire
+        );
+    }
+
+    /**
+     * Restore cached data to the field of the response which was skipped
+     * during resolving
+     */
+    function respond_with_cache($response)
+    {
+        if (is_array($response)) {
+            // The reponse is array when called from PHP using the graphql() function
+            $response['data'][$this->field_name] = $this->get_cached_data();
+        } else {
+            // From HTTP request the respones is an object with data property
+            $response->data[$this->field_name] = $this->get_cached_data();
+        }
 
         return $response;
     }
