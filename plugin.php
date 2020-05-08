@@ -22,3 +22,8 @@ if (!\class_exists('\WPGraphQL\Extensions\Cache')) {
 // before checking it in you should always run "composer install --no-dev" first.
 
 \WPGraphQL\Extensions\Cache\CacheManager::init();
+
+// Load integration test config when running tests
+if ('wp_graphql_cache' === getenv('WPTT_DB_NAME')) {
+    require_once __DIR__ . '/integration-test-config.php';
+}
