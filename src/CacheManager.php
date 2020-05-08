@@ -36,12 +36,12 @@ class CacheManager
         return $field;
     }
 
-    function clear_zone(string $zone): bool
+    static function clear_zone(string $zone): bool
     {
         return self::$backend->clear_zone($zone);
     }
 
-    function clear(): bool
+    static function clear(): bool
     {
         return self::$backend->clear();
     }
