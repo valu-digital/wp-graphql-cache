@@ -1,11 +1,24 @@
 <?php
 
+function getFieldCachingEndpoint($config)
+{
+    return '/?graphql&' .
+        http_build_query([
+            'test_query_field_config' => json_encode($config),
+        ]);
+}
+
 class HttpFieldCacheCest
 {
     public function testCacheStatusHeaders(FunctionalTester $I)
     {
         shell_exec('rm -rf /tmp/wp-graphql-cache/');
-        $endpoint = '/?graphql&field_cache_test';
+        $endpoint = getFieldCachingEndpoint([
+            'zone' => 'functional-field-test',
+            'query_name' => 'getPosts',
+            'field_name' => 'post',
+            'expire' => 60,
+        ]);
 
         $post_id = $I->havePostInDatabase(['post_title' => 'Test Post']);
 
