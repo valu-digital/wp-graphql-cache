@@ -82,6 +82,7 @@ class QueryCache extends AbstractCache
         // If wildcard is passed just mark the cache as matched
         if ($this->query_name === '*') {
             $this->match = true;
+            return;
         }
 
         // Otherwise check it matches with registered query name
@@ -117,7 +118,7 @@ class QueryCache extends AbstractCache
             new CachedValue(wp_json_encode($response)),
             $this->expire
         );
-        Utils::log('Writing query cache entyr');
+        Utils::log('Writing QueryCache ' . $this->key);
     }
 
     function respond_and_exit()
