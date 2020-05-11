@@ -103,12 +103,21 @@ class FieldCache
         );
     }
 
-    function __action_do_graphql_request(string $query, $query_name)
+    function __action_do_graphql_request(string $query, $operation_name)
     {
-        // Capture query if its name matches with configured field cache
-        if ($query_name === $this->query_name) {
+        // Capture from operation name if available
+        if ($operation_name === $this->query_name) {
+            $this->query = $query;
+            return;
+        }
+
+        // XXX this is a bad hack. Will replace with `graphql_ast` filter once it lands
+        // https://github.com/wp-graphql/wp-graphql/pull/1302
+        if (preg_match('/^ *query +' . $this->query_name . '/', trim($query))) {
             $this->query = $query;
         }
+
+        // $document_node->definitions[0]->name->value
     }
 
     function __filter_graphql_pre_resolve_field(

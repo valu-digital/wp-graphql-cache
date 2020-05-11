@@ -43,7 +43,6 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
 
         $actual = graphql([
             'query' => $query,
-            'operationname' => 'getPosts',
             'variables' => [
                 'postId' => $post_id,
                 'otherPostId' => $other_post_id,
@@ -67,7 +66,6 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
 
         $actual = graphql([
             'query' => $query,
-            'operationname' => 'getPosts',
             'variables' => [
                 'postId' => $post_id,
                 'otherPostId' => $other_post_id,
@@ -88,7 +86,6 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
 
         $actual = graphql([
             'query' => $query,
-            'operationname' => 'getPosts',
             'variables' => [
                 'postId' => $post_id,
                 'otherPostId' => $other_post_id,
@@ -142,7 +139,6 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
 
         $actual = graphql([
             'query' => $query,
-            'operationname' => 'getPosts',
             'variables' => [
                 'dingId' => $ding_id,
                 'dongId' => $dong_id,
@@ -169,7 +165,6 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
 
         $actual = graphql([
             'query' => $query,
-            'operationname' => 'getPosts',
             'variables' => [
                 'dingId' => $ding_id,
                 'dongId' => $dong_id,
@@ -217,7 +212,6 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
 
         $actual = graphql([
             'query' => $query,
-            'operationname' => 'getPosts',
             'variables' => [
                 'dingId' => $ding_id,
                 'dongId' => $dong_id,
@@ -243,7 +237,6 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
 
         $actual = graphql([
             'query' => $query,
-            'operationname' => 'getPosts',
             'variables' => [
                 'dingId' => $ding_id,
                 'dongId' => $dong_id,
@@ -287,7 +280,6 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
 
         $actual = graphql([
             'query' => $query,
-            'operationname' => 'getPosts',
             'variables' => [
                 'postId' => $post_id,
             ],
@@ -304,7 +296,6 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
 
         $actual = graphql([
             'query' => $query,
-            'operationname' => 'getPosts',
             'variables' => [
                 'postId' => $post_id,
             ],
@@ -317,7 +308,6 @@ class ExampleTest extends \Codeception\TestCase\WPTestCase
 
         $actual = graphql([
             'query' => $query,
-            'operationname' => 'getPosts',
             'variables' => [
                 'postId' => $post_id,
             ],

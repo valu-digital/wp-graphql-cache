@@ -19,7 +19,6 @@ class HttpFieldCacheCest
         $I->haveHttpHeader('Content-Type', 'application/json');
         $I->sendPOST('/?graphql', [
             'query' => $query,
-            'operationName' => 'getPosts',
             'variables' => [
                 'postId' => $post_id,
             ],
@@ -46,7 +45,6 @@ class HttpFieldCacheCest
         $I->haveHttpHeader('Content-Type', 'application/json');
         $I->sendPOST('/?graphql', [
             'query' => $query,
-            'operationName' => 'getPosts',
             'variables' => [
                 'postId' => $post_id,
             ],
