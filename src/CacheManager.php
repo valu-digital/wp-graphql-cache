@@ -14,17 +14,16 @@ class CacheManager
 
     static function init()
     {
+        self::$backend = apply_filters(
+            'graphql_cache_backend',
+            new Backend\FileSystem()
+        );
         add_action('plugins_loaded', [self::class, '__action_plugins_loaded']);
     }
 
     static function __action_plugins_loaded()
     {
         MeasurePerformance::init();
-
-        self::$backend = apply_filters(
-            'graphql_cache_backend',
-            new Backend\FileSystem()
-        );
 
         add_action('graphql_response_set_headers', [
             self::class,

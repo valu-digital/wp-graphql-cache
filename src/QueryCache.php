@@ -23,6 +23,12 @@ class QueryCache extends AbstractCache
     {
         parent::__construct($config);
         $this->query_name = $config['query_name'];
+
+        if (!$this->backend) {
+            throw new \Exception(
+                'No backend set for Query Cache: ' . $this->query_name
+            );
+        }
     }
 
     function activate()
