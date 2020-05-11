@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitf61a73f1adab7995952fdf77b754dd1f
+class ComposerStaticInit7c9993489d15a71347a49dce0cc7d9d8
 {
     public static $prefixLengthsPsr4 = array (
         'W' => 
@@ -31,14 +31,15 @@ class ComposerStaticInitf61a73f1adab7995952fdf77b754dd1f
         'WPGraphQL\\Extensions\\Cache\\MeasurePerformance' => __DIR__ . '/../..' . '/src/MeasurePerformance.php',
         'WPGraphQL\\Extensions\\Cache\\QueryCache' => __DIR__ . '/../..' . '/src/QueryCache.php',
         'WPGraphQL\\Extensions\\Cache\\Utils' => __DIR__ . '/../..' . '/src/Utils.php',
+        'WPGraphQL\\Extensions\\Cache\\WPCLICommand' => __DIR__ . '/../..' . '/src/WPCLICommand.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitf61a73f1adab7995952fdf77b754dd1f::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitf61a73f1adab7995952fdf77b754dd1f::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitf61a73f1adab7995952fdf77b754dd1f::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit7c9993489d15a71347a49dce0cc7d9d8::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit7c9993489d15a71347a49dce0cc7d9d8::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit7c9993489d15a71347a49dce0cc7d9d8::$classMap;
 
         }, null, ClassLoader::class);
     }

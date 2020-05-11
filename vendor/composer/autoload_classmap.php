@@ -16,4 +16,5 @@ return array(
     'WPGraphQL\\Extensions\\Cache\\MeasurePerformance' => $baseDir . '/src/MeasurePerformance.php',
     'WPGraphQL\\Extensions\\Cache\\QueryCache' => $baseDir . '/src/QueryCache.php',
     'WPGraphQL\\Extensions\\Cache\\Utils' => $baseDir . '/src/Utils.php',
+    'WPGraphQL\\Extensions\\Cache\\WPCLICommand' => $baseDir . '/src/WPCLICommand.php',
 );
