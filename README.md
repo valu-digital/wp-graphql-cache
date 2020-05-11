@@ -104,6 +104,15 @@ add_action('wp_update_nav_menu', function () {
 
 You can also share the same zone between multiple caches.
 
+### WP CLI
+
+The zones can be cleared using the WP CLI too
+
+```
+$ wp graphql-cache clear # clear all zones
+$ wp graphql-cache clear --zone=menus
+```
+
 ## Measuring Performance
 
 WPGraphQL Cache comes with very simple build query performance tool which

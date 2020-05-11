@@ -110,3 +110,7 @@ function register_graphql_field_cache($config)
 {
     CacheManager::register_graphql_field_cache($config);
 }
+
+if (class_exists('\WP_CLI')) {
+    WPCLICommand::init();
+}
