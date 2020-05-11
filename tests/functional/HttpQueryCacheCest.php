@@ -481,4 +481,66 @@ class HttpQueryCacheCest
         ]);
         $I->seeHttpHeader('x-graphql-query-cache', 'MISS');
     }
+
+    public function testVariablesGenerateDiffentCacheKeys(FunctionalTester $I)
+    {
+        shell_exec('rm -rf /tmp/wp-graphql-cache/');
+
+        $endpoint = getQueryCachingEndpoint([
+            'zone' => 'query_variables_test',
+            'query_name' => 'getPostsFullQuery',
+            'expire' => 60,
+        ]);
+
+        $post_id = $I->havePostInDatabase(['post_title' => 'Test Post']);
+        $other_post_id = $I->havePostInDatabase(['post_title' => 'Other test Post']);
+
+        $query = '
+		query getPostsFullQuery( $postId: ID! ) {
+		  post( id: $postId, idType: DATABASE_ID ) {
+			title
+          }
+ 		}
+        ';
+
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPOST($endpoint, [
+            'query' => $query,
+            'variables' => [
+                'postId' => $post_id,
+            ],
+        ]);
+
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->seeResponseCodeIs(200);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson([
+            'data' => [
+                'post' => [
+                    'title' => 'Test Post',
+                ],
+            ],
+        ]);
+        $I->seeHttpHeader('x-graphql-query-cache', 'MISS');
+
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPOST($endpoint, [
+            'query' => $query,
+            'variables' => [
+                'postId' => $other_post_id,
+            ],
+        ]);
+
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->seeResponseCodeIs(200);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson([
+            'data' => [
+                'post' => [
+                    'title' => 'Other test Post',
+                ],
+            ],
+        ]);
+        $I->seeHttpHeader('x-graphql-query-cache', 'MISS');
+    }
 }

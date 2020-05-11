@@ -366,4 +366,51 @@ class FieldCacheTest extends \Codeception\TestCase\WPTestCase
         $this->assertEquals(null, $actual['data']['badField']);
         $this->assertEquals('Updated post', $actual['data']['post']['title']);
     }
+
+    public function testVariablesGenerateDifferentKeys()
+    {
+        CacheManager::register_graphql_field_cache([
+            'zone' => 'test_variables',
+            'query_name' => 'getPostsVariable',
+            'field_name' => 'post',
+            'expire' => 1,
+        ]);
+
+        $post_id = self::factory()->post->create([
+            'post_title' => 'A Post',
+        ]);
+
+        $other_post_id = self::factory()->post->create([
+            'post_title' => 'The Other Post',
+        ]);
+
+        $query = '
+		query getPostsVariable( $postId: ID! ) {
+		  post( id: $postId, idType: DATABASE_ID ) {
+			title
+          }
+ 		}
+		';
+
+        $actual = graphql([
+            'query' => $query,
+            'variables' => [
+                'postId' => $post_id,
+            ],
+        ]);
+
+        $this->assertArrayNotHasKey('errors', $actual, print_r($actual, true));
+        $this->assertEquals('A Post', $actual['data']['post']['title']);
+
+        $actual = graphql([
+            'query' => $query,
+            'variables' => [
+                'postId' => $other_post_id,
+            ],
+        ]);
+
+        // Responds with the same data even when the post is updated
+        $this->assertArrayNotHasKey('errors', $actual, print_r($actual, true));
+        $this->assertEquals('The Other Post', $actual['data']['post']['title']);
+    }
 }
