@@ -57,8 +57,8 @@ This will start caching the `menuItems` root query on a GraphQL query named
 
 You can clear all GraphQL caches with `CacheManager::clear()` but if you want
 to be more specific with cache clearing you must pass in a `zone` property to
-`register_graphql_query_cache` and `register_graphql_field_cache` and it
-that zone with `CacheManager::clear_zone($zone)`.
+`register_graphql_query_cache` and `register_graphql_field_cache` and you can
+clear that zone with `CacheManager::clear_zone($zone)`.
 
 The `zone` is a caching zone the cache will be stored to. Zones are needed
 because the cached values are written to multiple cache keys.
