@@ -34,7 +34,7 @@ CacheManager::register_graphql_query_cache([
 ]);
 ```
 
-## Field Level Caching
+## Field Caching
 
 Lets say you have a big query fetching various things where most of them are
 reasonably fast but one of the is too slow. You can target that individual
@@ -50,7 +50,7 @@ CacheManager::register_graphql_field_cache([
 ]);
 ```
 
-This will start caching the `menuItems` root query on a GraphQL query named
+This will start caching the `menuItems` root field on a GraphQL query named
 `MyBigQuery` for 120 seconds.
 
 ## Cache Control with Zones
