@@ -74,12 +74,18 @@ class QueryCache extends AbstractCache
             $this->respond_and_exit();
         }
 
-        // Skip if not matcing the query name
         // XXX this is a bad hack. Will replace with `graphql_ast` filter once it lands
         // https://github.com/wp-graphql/wp-graphql/pull/1302
-        if (preg_match('/^ *query +' . $this->query_name . '/', trim($query))) {
+        preg_match('/^ *query +([^\{\(]+)/', trim($query), $matches);
+        $current_query_name = empty($matches) ? '__anonymous' : $matches[1];
+
+        // If wildcard is passed just mark the cache as matched
+        if ($this->query_name === '*') {
             $this->match = true;
         }
+
+        // Otherwise check it matches with registered query name
+        $this->match = $this->query_name === $current_query_name;
     }
 
     function __action_graphql_response_set_headers()
