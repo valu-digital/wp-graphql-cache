@@ -1,0 +1,75 @@
+#!/bin/sh
+
+set -eu
+
+help() {
+    >&2 echo "
+    Create new release. Creates git tag and github release
+    "
+}
+
+if [ "${1:-}" = "-h" -o "${1:-}" = "--help" ]; then
+    help
+    exit 1
+fi
+
+version_file="${1:-plugin.php}"
+sed_replace=-i
+
+if [ ! -f "$version_file" ]; then
+    >&2 echo "Cannot find $version_file"
+    exit 1
+fi
+
+if [ "$(uname)" = "Darwin" ]; then
+    sed_replace='-i ""'
+fi
+
+if [ "$(git status . --porcelain)" != "" ]; then
+    echo "Dirty git. Commit changes"
+    exit 1
+fi
+
+if [ "$(git rev-parse --abbrev-ref HEAD)" != "master" ]; then
+    echo "Not on the master branch"
+    exit 2
+fi
+
+git push origin master:master
+
+source="$(jq -r '.support.source' composer.json)"
+current_version="$(cat $version_file | sed -En 's/.*Version: ([^ ]*)/\1/p')"
+
+echo
+git log --format='- %s %h' "HEAD...v${current_version}" | sed 1,1d
+echo
+
+echo "Current version is: $current_version"
+
+read -p "New version> " new_version
+
+
+sed -E $sed_replace "s/(.*Version:) .*/\1 ${new_version}/" $version_file
+
+git commit -m "Release v${new_version}" $version_file
+git tag -a "v${new_version}" -m "Release v${new_version}"
+
+git push origin master:master
+git push origin --tags
+git push origin master:stable -f
+
+echo
+echo
+git log --format='- %s %h' "v${new_version}...v${current_version}" | sed 1,1d
+echo
+echo
+echo "All changes $source/compare/v${current_version}...v${new_version}"
+echo
+echo
+
+if [ "$(uname)" = "Darwin" ]; then
+    set -x
+    open "$source/releases/new?title=v${new_version}&tag=v${new_version}"
+else
+    echo "$source/releases/new?title=v${new_version}&tag=v${new_version}"
+fi
