@@ -107,8 +107,9 @@ itself before the GraphQL resolver execution.
 
 If you want to go beyond that you can enable GET requests with Persisted
 Queries in the [WPGraphQL Lock][] plugin and cache the whole response in your
-edge (nginx, varnish, CDN etc.). This will be absolute best performing cache
-because the PHP interpreter is not invoked at all on cache hit.
+edge server (nginx, varnish, CDN etc.). This will be the absolute best
+performing cache because the PHP interpreter is not invoked at all on cache
+hit.
 
 [wpgraphql lock]: https://github.com/valu-digital/wp-graphql-lock
 
