@@ -12,7 +12,7 @@ Flexible caching framework for WPGraphQL
 Or you can clone it from Github to your plugins using the stable branch
 
     cd wp-content/plugins
-    git clone --branch stable https://github.com/valu-digital/wp-graphql-polylang.git
+    git clone --branch stable https://github.com/valu-digital/wp-graphql-cache.git
 
 ## Query Caching
 
