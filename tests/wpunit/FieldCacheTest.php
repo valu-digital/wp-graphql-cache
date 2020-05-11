@@ -413,4 +413,63 @@ class FieldCacheTest extends \Codeception\TestCase\WPTestCase
         $this->assertArrayNotHasKey('errors', $actual, print_r($actual, true));
         $this->assertEquals('The Other Post', $actual['data']['post']['title']);
     }
+
+    public function testVariableKeyGenerationIsFieldSpecific()
+    {
+        CacheManager::register_graphql_field_cache([
+            'zone' => 'test_variables_field',
+            'query_name' => 'getPostsVariable',
+            'field_name' => 'third',
+            'expire' => 1,
+        ]);
+
+        $post_id = self::factory()->post->create([
+            'post_title' => 'A Post',
+        ]);
+
+        $other_post_id = self::factory()->post->create([
+            'post_title' => 'The Other Post',
+        ]);
+
+        $third_post_id = self::factory()->post->create([
+            'post_title' => 'Third post',
+        ]);
+
+        $query = "
+		query getPostsVariable( \$postId: ID! ) {
+		  post( id: \$postId, idType: DATABASE_ID ) {
+			title
+          }
+		  third: post( id: \"$third_post_id\", idType: DATABASE_ID ) {
+			title
+          }
+ 		}
+		";
+
+        $actual = graphql([
+            'query' => $query,
+            'variables' => [
+                'postId' => $post_id,
+            ],
+        ]);
+
+        $this->assertArrayNotHasKey('errors', $actual, print_r($actual, true));
+        $this->assertEquals('Third post', $actual['data']['third']['title']);
+
+        wp_update_post([
+            'ID' => $third_post_id,
+            'post_title' => 'Third post updated',
+        ]);
+
+        $actual = graphql([
+            'query' => $query,
+            'variables' => [
+                'postId' => $other_post_id,
+            ],
+        ]);
+
+        // Responds with the same data even when the post is updated
+        $this->assertArrayNotHasKey('errors', $actual, print_r($actual, true));
+        $this->assertEquals('Third post', $actual['data']['third']['title']);
+    }
 }
