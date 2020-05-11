@@ -35,7 +35,12 @@ abstract class AbstractCache
 
     function __construct($config)
     {
-        $this->zone = $config['zone'];
+        if (empty($config['zone'])) {
+            $this->zone = 'default';
+        } else {
+            $this->zone = $config['zone'];
+        }
+
         $this->backend = $config['backend'];
 
         if (!empty($config['expire'])) {
