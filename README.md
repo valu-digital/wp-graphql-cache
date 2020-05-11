@@ -106,8 +106,8 @@ You can also share the same zone between multiple caches.
 WPGraphQL Cache comes with very simple build query performance tool which
 adds a `x-graphql-duration` header to the `/graphql` responses. It contains
 the duration of the actual GraphQL reponse resolving in milliseconds. When no
-cache are hit that time is the theorical maximun this plugin can take of from
-the response times. Everything else is spend in setting up WP and WPGraphQL
+caches are hit this is the theorical maximun this plugin can take of from the
+response times. Everything else is spend in setting up WP and WPGraphQL
 itself before the GraphQL resolver execution.
 
 If you want to go beyond that you can enable GET requests with Persisted
