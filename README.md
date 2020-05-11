@@ -136,8 +136,10 @@ There are couple storage backends availables which can be configured using
 the `graphql_cache_backend` filter.
 
 ```php
+use WPGraphQL\Extensions\Cache\Backend\FileSystem;
+
 add_filter('graphql_cache_backend', function () {
-    return new \WPGraphQL\Extensions\Cache\Backend\FileSystem('/custom/path');
+    return new FileSystem('/custom/path');
 });
 ```
 
