@@ -137,7 +137,7 @@ the `graphql_cache_backend` filter.
 
 ```php
 add_filter('graphql_cache_backend', function () {
-    return new \WPGraphQL\Extensions\Cache\FileSystem('/custom/path');
+    return new \WPGraphQL\Extensions\Cache\Backend\FileSystem('/custom/path');
 });
 ```
 
