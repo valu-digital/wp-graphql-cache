@@ -9,17 +9,41 @@ Flexible caching framework for WPGraphQL
 
 TODO
 
+## Query Caching
+
+If you want to just start caching all your queries for a given period of time
+you can just add this to your theme's `functions.php` or to a mu-plugin:
+
+```php
+use WPGraphQL\Extensions\Cache\CacheManager;
+
+CacheManager::register_graphql_query_cache([
+    'query_name' => '*',
+    'expire' => 120, // sec
+]);
+```
+
+or you can target specific queries
+
+```php
+use WPGraphQL\Extensions\Cache\CacheManager;
+
+CacheManager::register_graphql_query_cache([
+    'query_name' => 'MySlowQuery',
+    'expire' => 120,
+]);
+```
+
 ## Field Level Caching
 
 Lets say you have a big query fetching various things where most of them are
 reasonably fast but one of the is too slow. You can target that individual
-field with `register_graphql_field_cache()`.
+root field with `register_graphql_field_cache()`.
 
 ```php
 use WPGraphQL\Extensions\Cache\CacheManager;
 
 CacheManager::register_graphql_field_cache([
-    'zone' => 'menus',
     'query_name' => 'MyBigQuery',
     'field_name' => 'menuItems',
     'expire' => 120, // sec
@@ -29,8 +53,14 @@ CacheManager::register_graphql_field_cache([
 This will start caching the `menuItems` root query on a GraphQL query named
 `MyBigQuery` for 120 seconds.
 
-The `zone` is a caching zone the cache will be stored to. This is to have the
-ability to manually clear the cache before it expires. Zones are needed
+## Cache Control with Zones
+
+You can clear all GraphQL caches with `CacheManager::clear()` but if you want
+to be more specific with cache clearing you must pass in a `zone` property to
+`register_graphql_query_cache` and `register_graphql_field_cache` and it
+that zone with `CacheManager::clear_zone($zone)`.
+
+The `zone` is a caching zone the cache will be stored to. Zones are needed
 because the cached values are written to multiple cache keys.
 
 Multiple cache keys are used because these things can change between
@@ -47,8 +77,17 @@ The zone can be cleared with `CacheManager::clear_zone()`
 
 ```php
 /**
- * Clear the zone 'menus' where the 'menuItems' is cached when the menus are
- * updated
+ * Register cache to a 'menus' zone
+ */
+CacheManager::register_graphql_field_cache([
+    'zone' => 'menus', // 👈
+    'query_name' => 'MyBigQuery',
+    'field_name' => 'menuItems',
+    'expire' => 120, // sec
+]);
+
+/**
+ * Clear the zone 'menus' when the menus are updated
  */
 add_action('wp_update_nav_menu', function () {
     CacheManager::clear_zone('menus');
@@ -56,10 +95,6 @@ add_action('wp_update_nav_menu', function () {
 ```
 
 You can also share the same zone between multiple caches.
-
-## Full Query Caching
-
-TODO
 
 ## Storage Backends
 
