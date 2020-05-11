@@ -117,10 +117,10 @@ $ wp graphql-cache clear --zone=menus
 
 WPGraphQL Cache comes with very simple build query performance tool which
 adds a `x-graphql-duration` header to the `/graphql` responses. It contains
-the duration of the actual GraphQL reponse resolving in milliseconds. When no
-caches are hit this is the theorical maximun this plugin can take of from the
-response times. Everything else is spend in setting up WP and WPGraphQL
-itself before the GraphQL resolver execution.
+the duration of the actual GraphQL response **resolving** in milliseconds.
+When no caches are hit this is the theoretical maximun this plugin can take
+of from the response times. Everything else is spend in setting up WP and
+WPGraphQL itself before the GraphQL resolver execution.
 
 If you want to go beyond that you can enable GET requests with Persisted
 Queries in the [WPGraphQL Lock][] plugin and cache the whole response in your
