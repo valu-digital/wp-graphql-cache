@@ -144,5 +144,6 @@ class HttpFieldCacheCest
                 ],
             ],
         ]);
+        $I->seeHttpHeader('x-graphql-field-cache', 'MISS:post');
     }
 }

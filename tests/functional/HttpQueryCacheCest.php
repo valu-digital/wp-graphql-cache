@@ -344,4 +344,72 @@ class HttpQueryCacheCest
         ]);
         $I->seeHttpHeader('x-graphql-query-cache', 'HIT');
     }
+
+    public function testDoesNotCacheWithErrors(FunctionalTester $I)
+    {
+        shell_exec('rm -rf /tmp/wp-graphql-cache/');
+
+        $endpoint = getQueryCachingEndpoint([
+            'zone' => 'query_cache_test',
+            'query_name' => 'ErrorQuery',
+            'expire' => 60,
+        ]);
+
+        $post_id = $I->havePostInDatabase(['post_title' => 'Test Post']);
+
+        $query = '
+		query ErrorQuery( $postId: ID! ) {
+          badField
+		  post( id: $postId, idType: DATABASE_ID ) {
+			title
+          }
+ 		}
+        ';
+
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPOST($endpoint, [
+            'query' => $query,
+            'variables' => [
+                'postId' => $post_id,
+            ],
+        ]);
+
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->seeResponseCodeIs(200);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson([
+            'data' => [
+                'post' => [
+                    'title' => 'Test Post',
+                ],
+            ],
+        ]);
+        $I->seeHttpHeader('x-graphql-query-cache', 'MISS');
+
+        $I->updateInDatabase(
+            $I->grabPostsTableName(),
+            ['post_title' => 'Updated Post'],
+            ['ID' => $post_id]
+        );
+
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPOST($endpoint, [
+            'query' => $query,
+            'variables' => [
+                'postId' => $post_id,
+            ],
+        ]);
+
+        $I->seeHttpHeader('Content-Type', 'application/json; charset=UTF-8');
+        $I->seeResponseCodeIs(200);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson([
+            'data' => [
+                'post' => [
+                    'title' => 'Updated Post',
+                ],
+            ],
+        ]);
+        $I->seeHttpHeader('x-graphql-query-cache', 'MISS');
+    }
 }

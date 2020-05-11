@@ -117,6 +117,10 @@ class QueryCache extends AbstractCache
             return;
         }
 
+        if (!empty($response->errors)) {
+            return;
+        }
+
         // Save results as pre encoded json
         $this->backend->set(
             $this->zone,
