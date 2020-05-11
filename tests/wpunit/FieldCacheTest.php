@@ -2,7 +2,7 @@
 
 use WPGraphQL\Extensions\Cache\CacheManager;
 
-class ExampleTest extends \Codeception\TestCase\WPTestCase
+class FieldCacheTest extends \Codeception\TestCase\WPTestCase
 {
     public function setUp(): void
     {
