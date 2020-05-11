@@ -2,6 +2,15 @@
 
 use WPGraphQL\Extensions\Cache\CacheManager;
 
+add_action('graphql_register_types', function () {
+    register_graphql_field('RootQuery', 'badField', [
+        'type' => 'String',
+        'resolve' => function ($root, $args, $context, $info) {
+            crash();
+        },
+    ]);
+});
+
 if (!defined('WPTT_INSTALL')) {
     return;
 }

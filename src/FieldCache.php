@@ -188,12 +188,20 @@ class FieldCache extends AbstractCache
         $data = null;
 
         if (is_array($response)) {
-            // The reponse is array when called from PHP using the graphql() function
+            // The response is array when called from PHP using the graphql() function
+            if (isset($response['errors'])) {
+                // Do not cache if there were errors
+                return;
+            }
             if (!isset($response['data'][$this->field_name])) {
                 return;
             }
             $data = $response['data'][$this->field_name];
         } else {
+            if (!empty($response->errors)) {
+                return;
+            }
+
             // From HTTP request the respones is an object with data property
             if (!isset($response->data[$this->field_name])) {
                 return;

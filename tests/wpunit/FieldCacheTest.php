@@ -316,4 +316,54 @@ class FieldCacheTest extends \Codeception\TestCase\WPTestCase
         // But user1 still sees the original from cache
         $this->assertEquals('A Post', $actual['data']['post']['title']);
     }
+
+    public function testDoesNotCacheOnErrors()
+    {
+        CacheManager::register_graphql_field_cache([
+            'zone' => 'test',
+            'query_name' => 'getPosts',
+            'field_name' => 'post',
+            'expire' => 60,
+        ]);
+
+        $post_id = self::factory()->post->create([
+            'post_title' => 'A Post',
+        ]);
+
+        $query = '
+		query getPosts( $postId: ID! ) {
+          badField
+		  post( id: $postId, idType: DATABASE_ID ) {
+            title
+          }
+ 		}
+		';
+
+        $actual = graphql([
+            'query' => $query,
+            'variables' => [
+                'postId' => $post_id,
+            ],
+        ]);
+
+        $this->assertArrayHasKey('errors', $actual);
+        $this->assertEquals('A Post', $actual['data']['post']['title']);
+        $this->assertEquals(null, $actual['data']['badField']);
+
+        wp_update_post([
+            'ID' => $post_id,
+            'post_title' => 'Updated post',
+        ]);
+
+        $actual = graphql([
+            'query' => $query,
+            'variables' => [
+                'postId' => $post_id,
+            ],
+        ]);
+
+        $this->assertArrayHasKey('errors', $actual);
+        $this->assertEquals(null, $actual['data']['badField']);
+        $this->assertEquals('Updated post', $actual['data']['post']['title']);
+    }
 }
