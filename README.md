@@ -96,6 +96,22 @@ add_action('wp_update_nav_menu', function () {
 
 You can also share the same zone between multiple caches.
 
+## Measuring Performance
+
+WPGraphQL Cache comes with very simple build query performance tool which
+adds a `x-graphql-duration` header to the `/graphql` responses. It contains
+the duration of the actual GraphQL reponse resolving in milliseconds. That
+time is the theorical maximun this plugin can take of from the response times
+when no caches are hit. Everything else is spend in setting up WP and WPGraphQL
+itself before the GraphQL resolver execution.
+
+If you want to go beyond that you can enable GET requests with Persisted
+Queries in the [WPGraphQL Lock][] plugin and cache the whole response in your
+edge (nginx, varnish, CDN etc.). This will be absolute best performing cache
+because the PHP interpreter is not invoked at all on cache hit.
+
+[wpgraphql lock]: https://github.com/valu-digital/wp-graphql-lock
+
 ## Storage Backends
 
 There are couple storage backends availables which can be configured using
