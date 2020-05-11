@@ -76,7 +76,7 @@ class QueryCache extends AbstractCache
 
         // XXX this is a bad hack. Will replace with `graphql_ast` filter once it lands
         // https://github.com/wp-graphql/wp-graphql/pull/1302
-        preg_match('/^ *query +([^\{\(]+)/', trim($query), $matches);
+        preg_match('/^ *query +([^\{\(]\w+)/', trim($query), $matches);
         $current_query_name = empty($matches) ? '__anonymous' : $matches[1];
 
         // If wildcard is passed just mark the cache as matched
