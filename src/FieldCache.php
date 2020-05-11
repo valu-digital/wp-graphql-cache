@@ -7,17 +7,8 @@ namespace WPGraphQL\Extensions\Cache;
 /**
  * Class that takes care of caching individual field per graphql request
  */
-class FieldCache
+class FieldCache extends AbstractCache
 {
-    ////////////////////////
-    // CONFIG PROPERTIES  //
-    ////////////////////////
-
-    /**
-     * The zone name this field belongs to
-     */
-    protected $zone = null;
-
     /**
      * GraphQL Query name this cache should match against
      */
@@ -29,35 +20,9 @@ class FieldCache
     protected $field_name = null;
 
     /**
-     * Expire cached value after given seconds
-     */
-    protected $expire = null;
-
-    /**
-     * @type Backend\AbstractBackend
-     */
-    protected $backend = null;
-
-    ///////////////////////
-    // STATE PROPERTIES  //
-    ///////////////////////
-
-    /**
-     * Restored value from the cache backend
-     *
-     * @type CachedValue
-     */
-    protected $cached_value = null;
-
-    /**
      * True when running againts matched field
      */
     protected $match = false;
-
-    /**
-     * The cache key
-     */
-    protected $key = null;
 
     /**
      * The current graphql query as string
@@ -66,14 +31,9 @@ class FieldCache
 
     function __construct($config)
     {
-        $this->zone = $config['zone'];
+        parent::__construct($config);
         $this->query_name = $config['query_name'];
         $this->field_name = $config['field_name'];
-        $this->backend = $config['backend'];
-
-        if (!empty($config['expire'])) {
-            $this->expire = intval($config['expire']);
-        }
     }
 
     function activate()
@@ -81,8 +41,8 @@ class FieldCache
         add_action(
             'do_graphql_request',
             [$this, '__action_do_graphql_request'],
-            2,
-            10
+            10,
+            2
         );
 
         add_filter(
@@ -155,7 +115,7 @@ class FieldCache
         $query_hash = Utils::hash($this->query);
         $user_id = get_current_user_id();
 
-        $this->key = "{$query_name}-${field_name}-${user_id}-{$query_hash}-${args_hash}";
+        $this->key = "field-{$query_name}-${field_name}-${user_id}-{$query_hash}-${args_hash}";
 
         $this->read_cache();
 
@@ -267,22 +227,6 @@ class FieldCache
     }
 
     /**
-     * Get the backend instance
-     */
-    function get_backend(): Backend\AbstractBackend
-    {
-        return $this->backend;
-    }
-
-    /**
-     * Retrns true when the field cache has warm cache hit
-     */
-    function has_hit(): bool
-    {
-        return $this->cached_value instanceof CachedValue;
-    }
-
-    /**
      * Returns true when this field should be cached
      */
     function has_match(): bool
@@ -296,81 +240,5 @@ class FieldCache
     function get_field_name()
     {
         return $this->field_name;
-    }
-
-    /**
-     * Get the raw cached out of the CachedValue container
-     */
-    function get_cached_data()
-    {
-        if (!$this->has_hit()) {
-            throw new \Error(
-                'No cached value available. Check first with "FieldCache#has_hit()"'
-            );
-        }
-
-        return $this->cached_value->get_data();
-    }
-
-    /**
-     * Get the cache key
-     */
-    function get_cache_key(): string
-    {
-        if (null === $this->key) {
-            throw new \Error(
-                'Cache key not generated yet. FieldCache#get_cache_key() can be called only after the graphql_pre_resolve_field filter'
-            );
-        }
-
-        return $this->key;
-    }
-
-    /**
-     * Read data from the cache backend but discard immediately it if has been expired
-     */
-    function read_cache()
-    {
-        $this->cached_value = $this->backend->get(
-            $this->zone,
-            $this->get_cache_key()
-        );
-
-        if ($this->cached_value && $this->has_expired()) {
-            Utils::log('EXPIRED ' . $this->get_cache_key());
-            $this->delete();
-        }
-    }
-
-    /**
-     * Delete the current key from the cache
-     */
-    function delete()
-    {
-        $this->cached_value = null;
-        $this->backend->delete($this->zone, $this->get_cache_key());
-    }
-
-    /**
-     * Clear the used zone from the backend
-     */
-    function clear_zone()
-    {
-        $this->cached_value = null;
-        $this->backend->clear_zone($this->zone);
-    }
-
-    /**
-     * Check if the value has been expired
-     */
-    function has_expired(): bool
-    {
-        if (empty($this->expire)) {
-            return false;
-        }
-
-        $age = microtime(true) - $this->cached_value->get_created();
-        $max_age = $this->expire;
-        return $age > $max_age;
     }
 }

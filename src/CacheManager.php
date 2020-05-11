@@ -8,6 +8,8 @@ class CacheManager
 {
     static $fields = [];
 
+    static $query_caches = [];
+
     static $backend = null;
 
     static function init()
@@ -41,6 +43,27 @@ class CacheManager
         return $field;
     }
 
+    static function register_graphql_query_cache($config)
+    {
+        if (empty($config['backend'])) {
+            $config['backend'] = self::$backend;
+        }
+
+        $query_cache = new QueryCache($config);
+        self::$query_caches[] = $query_cache;
+
+        $is_active = apply_filters('graphql_cache_active', true);
+
+        if ($is_active) {
+            $query_cache->activate();
+        }
+
+        return $query_cache;
+    }
+
+    /**
+     * Set cache status headers for the field caches
+     */
     static function __action_graphql_response_set_headers()
     {
         $value = [];
@@ -55,6 +78,10 @@ class CacheManager
             } else {
                 $value[] = 'MISS:' . $field->get_field_name();
             }
+        }
+
+        if (empty($value)) {
+            return;
         }
 
         $value = implode(', ', $value);

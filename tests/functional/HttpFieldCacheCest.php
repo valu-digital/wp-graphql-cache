@@ -5,6 +5,7 @@ class HttpFieldCacheCest
     public function testCacheStatusHeaders(FunctionalTester $I)
     {
         shell_exec('rm -rf /tmp/wp-graphql-cache/');
+        $endpoint = '/?graphql&field_cache_test';
 
         $post_id = $I->havePostInDatabase(['post_title' => 'Test Post']);
 
@@ -17,7 +18,7 @@ class HttpFieldCacheCest
         ';
 
         $I->haveHttpHeader('Content-Type', 'application/json');
-        $I->sendPOST('/?graphql', [
+        $I->sendPOST($endpoint, [
             'query' => $query,
             'variables' => [
                 'postId' => $post_id,
@@ -43,7 +44,7 @@ class HttpFieldCacheCest
         );
 
         $I->haveHttpHeader('Content-Type', 'application/json');
-        $I->sendPOST('/?graphql', [
+        $I->sendPOST($endpoint, [
             'query' => $query,
             'variables' => [
                 'postId' => $post_id,
