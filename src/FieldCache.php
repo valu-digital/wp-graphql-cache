@@ -142,7 +142,7 @@ class FieldCache extends AbstractCache
         // because only in that case this instance is reused. For HTTP requests
         // we want to keep the state around so we can set the status response
         // headers
-        if (!is_graphql_http_request()) {
+        if (!\is_graphql_http_request()) {
             $this->reset_state();
         }
         return $response;

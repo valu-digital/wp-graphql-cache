@@ -128,6 +128,9 @@ class QueryCache extends AbstractCache
                 get_option('blog_charset')
         );
         header('x-graphql-query-cache: HIT');
+
+        do_action('graphql_cache_early_response');
+
         // We stored the encoded JSON string so we can just respond with it here
         echo $this->get_cached_data();
         die();
