@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WPGraphQL\Extensions\Cache;
 
+use WPGraphQL\Extensions\Cache\Backend\AbstractBackend;
+
 /**
  * Class that takes care of caching individual field per graphql request
  */
@@ -36,8 +38,16 @@ class FieldCache extends AbstractCache
         $this->field_name = $config['field_name'];
     }
 
-    function activate()
+    /**
+     * Activate the cache with the given backend if the cache did not have own
+     * custom backend.
+     */
+    function activate(AbstractBackend $backend)
     {
+        if (!$this->backend) {
+            $this->backend = $backend;
+        }
+
         add_action(
             'do_graphql_request',
             [$this, '__action_do_graphql_request'],

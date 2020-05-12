@@ -41,7 +41,7 @@ abstract class AbstractCache
             $this->zone = $config['zone'];
         }
 
-        $this->backend = $config['backend'];
+        $this->backend = $config['backend'] ?? null;
 
         if (!empty($config['expire'])) {
             $this->expire = intval($config['expire']);

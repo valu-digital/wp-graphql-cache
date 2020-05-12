@@ -12,23 +12,49 @@ class CacheManager
 
     static $backend = null;
 
+    static $initialized = false;
+
     static function init()
     {
-        self::$backend = apply_filters(
-            'graphql_cache_backend',
-            new Backend\FileSystem()
-        );
-        add_action('plugins_loaded', [self::class, '__action_plugins_loaded']);
-    }
+        if (self::$initialized) {
+            return;
+        }
 
-    static function __action_plugins_loaded()
-    {
-        MeasurePerformance::init();
+        self::$initialized = true;
 
         add_action('graphql_response_set_headers', [
             self::class,
             '__action_graphql_response_set_headers',
         ]);
+
+        add_action('graphql_init', [self::class, '__action_graphql_init']);
+    }
+
+    static function __action_graphql_init()
+    {
+        MeasurePerformance::init();
+
+        /***
+         * Initialize the default backend
+         */
+        self::$backend = apply_filters(
+            'graphql_cache_backend',
+            new Backend\FileSystem()
+        );
+
+        $is_active = apply_filters('graphql_cache_active', true);
+
+        if (!$is_active) {
+            return;
+        }
+
+        foreach (self::$fields as $field) {
+            $field->activate(self::$backend);
+        }
+
+        foreach (self::$query_caches as $query_cache) {
+            $query_cache->activate(self::$backend);
+        }
     }
 
     static function register_graphql_field_cache($config)
@@ -40,10 +66,8 @@ class CacheManager
         $field = new FieldCache($config);
         self::$fields[] = $field;
 
-        $is_active = apply_filters('graphql_cache_active', true);
-
-        if ($is_active) {
-            $field->activate();
+        if (did_action('graphql_init')) {
+            $field->activate(self::$backend);
         }
 
         return $field;
@@ -58,10 +82,8 @@ class CacheManager
         $query_cache = new QueryCache($config);
         self::$query_caches[] = $query_cache;
 
-        $is_active = apply_filters('graphql_cache_active', true);
-
-        if ($is_active) {
-            $query_cache->activate();
+        if (did_action('graphql_init')) {
+            $query_cache->activate(self::$backend);
         }
 
         return $query_cache;

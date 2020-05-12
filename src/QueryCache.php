@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WPGraphQL\Extensions\Cache;
 
+use WPGraphQL\Extensions\Cache\Backend\AbstractBackend;
+
 /**
  * Class that takes care of caching of full queries
  */
@@ -23,16 +25,18 @@ class QueryCache extends AbstractCache
     {
         parent::__construct($config);
         $this->query_name = $config['query_name'];
-
-        if (!$this->backend) {
-            throw new \Exception(
-                'No backend set for Query Cache: ' . $this->query_name
-            );
-        }
     }
 
-    function activate()
+    /**
+     * Activate the cache with the given backend if the cache did not have own
+     * custom backend.
+     */
+    function activate(AbstractBackend $backend)
     {
+        if (!$this->backend) {
+            $this->backend = $backend;
+        }
+
         add_action(
             'do_graphql_request',
             [$this, '__action_do_graphql_request'],
