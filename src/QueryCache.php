@@ -67,6 +67,7 @@ class QueryCache extends AbstractCache
         $args_hash = empty($variables)
             ? 'null'
             : Utils::hash(Utils::stable_string($variables));
+
         $query_hash = Utils::hash($query);
 
         $this->key = "query-{$this->query_name}-${user_id}-{$query_hash}-${args_hash}";
@@ -80,10 +81,7 @@ class QueryCache extends AbstractCache
             $this->respond_and_exit();
         }
 
-        // XXX this is a bad hack. Will replace with `graphql_ast` filter once it lands
-        // https://github.com/wp-graphql/wp-graphql/pull/1302
-        preg_match('/^ *query +([^\{\(]\w+)/', trim($query), $matches);
-        $current_query_name = empty($matches) ? '__anonymous' : $matches[1];
+        $current_query_name = Utils::get_query_name($query);
 
         // If wildcard is passed just mark the cache as matched
         if ($this->query_name === '*') {

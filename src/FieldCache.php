@@ -71,13 +71,10 @@ class FieldCache extends AbstractCache
             return;
         }
 
-        // XXX this is a bad hack. Will replace with `graphql_ast` filter once it lands
-        // https://github.com/wp-graphql/wp-graphql/pull/1302
-        if (preg_match('/^ *query +' . $this->query_name . '/', trim($query))) {
+        $current_query_name = Utils::get_query_name($query);
+        if ($current_query_name === $this->query_name) {
             $this->query = $query;
         }
-
-        // $document_node->definitions[0]->name->value
     }
 
     function __filter_graphql_pre_resolve_field(

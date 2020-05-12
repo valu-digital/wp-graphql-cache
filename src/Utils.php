@@ -36,4 +36,19 @@ class Utils
 
         error_log("wpgql-cache: $msg");
     }
+
+    /**
+     * XXX this is a bad hack. Will replace with `graphql_ast` filter once it lands
+     * https://github.com/wp-graphql/wp-graphql/pull/1302
+     */
+    static function get_query_name(string $query): string
+    {
+        preg_match('/^query +([^\{\(]\w+)/', trim($query), $matches);
+
+        if (empty($matches)) {
+            return '__anonymous';
+        }
+
+        return $matches[1];
+    }
 }
