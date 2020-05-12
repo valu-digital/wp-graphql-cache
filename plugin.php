@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/valu-digital/wp-graphql-cache
  * Description: Add caching for WPGraphQL
  * Author: Esa-Matti Suuronen, Valu Digital Oy
- * Version: 0.0.5
+ * Version: 0.0.6
  */
 
 // To make this plugin work properly for both Composer users and non-composer
