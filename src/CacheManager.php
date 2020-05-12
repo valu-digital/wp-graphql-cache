@@ -70,10 +70,6 @@ class CacheManager
 
     static function register_graphql_field_cache($config)
     {
-        if (empty($config['backend'])) {
-            $config['backend'] = self::$backend;
-        }
-
         $field = new FieldCache($config);
         self::$fields[] = $field;
 
@@ -86,10 +82,6 @@ class CacheManager
 
     static function register_graphql_query_cache($config)
     {
-        if (empty($config['backend'])) {
-            $config['backend'] = self::$backend;
-        }
-
         $query_cache = new QueryCache($config);
         self::$query_caches[] = $query_cache;
 
