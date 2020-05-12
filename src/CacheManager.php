@@ -32,6 +32,18 @@ class CacheManager
         add_action('graphql_init', [self::class, '__action_graphql_init']);
     }
 
+    static function assert_initialization()
+    {
+        if (self::$initialized) {
+            return;
+        }
+        error_log(
+            'wp-graphql-cache: Error: registering caches without initializing the plugin. ' .
+                'Activate to plugin from wp-admin or call \WPGraphQL\Extensions\Cache\CacheManager::init() ' .
+                'before registering the caches.'
+        );
+    }
+
     static function __action_graphql_init()
     {
         MeasurePerformance::init();
@@ -70,6 +82,7 @@ class CacheManager
 
     static function register_graphql_field_cache($config)
     {
+        self::assert_initialization();
         $field = new FieldCache($config);
         self::$fields[] = $field;
 
@@ -82,6 +95,7 @@ class CacheManager
 
     static function register_graphql_query_cache($config)
     {
+        self::assert_initialization();
         $query_cache = new QueryCache($config);
         self::$query_caches[] = $query_cache;
 
