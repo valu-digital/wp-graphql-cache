@@ -14,6 +14,8 @@ class CacheManager
 
     static $initialized = false;
 
+    static $is_active = true;
+
     static function init()
     {
         if (self::$initialized) {
@@ -42,9 +44,9 @@ class CacheManager
             new Backend\FileSystem()
         );
 
-        $is_active = apply_filters('graphql_cache_active', true);
+        self::$is_active = apply_filters('graphql_cache_active', true);
 
-        if (!$is_active) {
+        if (!self::$is_active) {
             return;
         }
 
@@ -57,6 +59,15 @@ class CacheManager
         }
     }
 
+    /**
+     * Returns true when the graphql has been already initialized and the caching
+     * is active
+     */
+    static function should_activate_now()
+    {
+        return self::$is_active && did_action('graphql_init');
+    }
+
     static function register_graphql_field_cache($config)
     {
         if (empty($config['backend'])) {
@@ -66,7 +77,7 @@ class CacheManager
         $field = new FieldCache($config);
         self::$fields[] = $field;
 
-        if (did_action('graphql_init')) {
+        if (self::should_activate_now()) {
             $field->activate(self::$backend);
         }
 
@@ -82,7 +93,7 @@ class CacheManager
         $query_cache = new QueryCache($config);
         self::$query_caches[] = $query_cache;
 
-        if (did_action('graphql_init')) {
+        if (self::should_activate_now()) {
             $query_cache->activate(self::$backend);
         }
 
