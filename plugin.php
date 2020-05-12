@@ -13,7 +13,7 @@
 // class_exists(). If not it means there's no global autoloader in place and
 // the user is not using composer. In that case we can safely require the
 // bundled autoloader code.
-if (!\class_exists('\WPGraphQL\Extensions\Cache')) {
+if (!\class_exists('\WPGraphQL\Extensions\Cache\CacheManager')) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 // This way we can add the vendor/ directory to git and have the plugin "just
