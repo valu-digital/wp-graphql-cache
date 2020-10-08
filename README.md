@@ -65,17 +65,8 @@ to be more specific with cache clearing you must pass in a `zone` property to
 clear that zone with `CacheManager::clear_zone($zone)`.
 
 The `zone` is a caching zone the cache will be stored to. Zones are needed
-because the cached values are written to multiple cache keys.
-
-Multiple cache keys are used because these things can change between
-queries:
-
--   GraphQL variables
--   Current user id
--   The actual GraphQL query content
-
-This also means that caches are not shared between different versions of the
-queries or between users.
+because the cached responses are written to multiple cache keys because graphql
+variables and the current user can change between calls to the same query
 
 The zone can be cleared with `CacheManager::clear_zone()`
 
