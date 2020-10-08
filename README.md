@@ -1,12 +1,8 @@
 WARNING: This is an ALPHA release and not feature complete yet.
 
-NOTE: Field caching requires the `develop` branch from WPGraphQL until [PR
-1289](https://github.com/wp-graphql/wp-graphql/pull/1289) ships in a stable
-version. Query caching should work with the latest stable.
-
 # WPGraphQL Cache
 
-Flexible caching framework for WPGraphQL
+Flexible caching framework for WPGraphQL v0.9.0 or later
 
 ## Installation
 
