@@ -25,6 +25,7 @@ class ComposerStaticInita74333163ecc514adfca7ffa2a27ffad
         'WPGraphQL\\Extensions\\Cache\\Backend\\AbstractBackend' => __DIR__ . '/../..' . '/src/Backend/AbstractBackend.php',
         'WPGraphQL\\Extensions\\Cache\\Backend\\FileSystem' => __DIR__ . '/../..' . '/src/Backend/FileSystem.php',
         'WPGraphQL\\Extensions\\Cache\\Backend\\OPCache' => __DIR__ . '/../..' . '/src/Backend/OPCache.php',
+        'WPGraphQL\\Extensions\\Cache\\Backend\\Transient' => __DIR__ . '/../..' . '/src/Backend/Transient.php',
         'WPGraphQL\\Extensions\\Cache\\CacheManager' => __DIR__ . '/../..' . '/src/CacheManager.php',
         'WPGraphQL\\Extensions\\Cache\\CachedValue' => __DIR__ . '/../..' . '/src/CachedValue.php',
         'WPGraphQL\\Extensions\\Cache\\FieldCache' => __DIR__ . '/../..' . '/src/FieldCache.php',

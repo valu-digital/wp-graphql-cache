@@ -10,6 +10,7 @@ return array(
     'WPGraphQL\\Extensions\\Cache\\Backend\\AbstractBackend' => $baseDir . '/src/Backend/AbstractBackend.php',
     'WPGraphQL\\Extensions\\Cache\\Backend\\FileSystem' => $baseDir . '/src/Backend/FileSystem.php',
     'WPGraphQL\\Extensions\\Cache\\Backend\\OPCache' => $baseDir . '/src/Backend/OPCache.php',
+    'WPGraphQL\\Extensions\\Cache\\Backend\\Transient' => $baseDir . '/src/Backend/Transient.php',
     'WPGraphQL\\Extensions\\Cache\\CacheManager' => $baseDir . '/src/CacheManager.php',
     'WPGraphQL\\Extensions\\Cache\\CachedValue' => $baseDir . '/src/CachedValue.php',
     'WPGraphQL\\Extensions\\Cache\\FieldCache' => $baseDir . '/src/FieldCache.php',
