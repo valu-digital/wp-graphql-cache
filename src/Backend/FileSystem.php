@@ -9,11 +9,17 @@ use WPGraphQL\Extensions\Cache\CachedValue;
 class FileSystem extends AbstractBackend
 {
     protected $base_directory = null;
+    protected $directory_permissions = null;
+    protected $file_permissions = null;
 
     function __construct($config = [])
     {
         $this->base_directory =
             $config['base_directory'] ?? '/tmp/wp-graphql-cache';
+        $this->directory_permissions =
+            $config['directory_permissions'] ?? '0700';
+        $this->file_permissions =
+            $config['file_permissions'] ?? '0600';
     }
 
     protected function get_path(string $zone, string $key): string
@@ -27,13 +33,15 @@ class FileSystem extends AbstractBackend
         $dir = dirname($full_path);
 
         if (!is_dir($dir)) {
-            mkdir($dir, 0700, true);
+            mkdir( $dir, 0700, true );
+            chmod( $this->base_directory, octdec( $this->directory_permissions ) );
+            chmod( $dir, octdec( $this->directory_permissions ) );
         }
 
         // First intialize with an empty file which cannot be read by anyone
         // else
         touch($full_path);
-        chmod($full_path, 0600);
+        chmod( $full_path, octdec( $this->file_permissions ) );
 
         file_put_contents($full_path, $contents, LOCK_EX);
     }

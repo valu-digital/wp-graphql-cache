@@ -126,7 +126,11 @@ the `graphql_cache_backend` filter.
 use WPGraphQL\Extensions\Cache\Backend\FileSystem;
 
 add_filter('graphql_cache_backend', function () {
-    return new FileSystem('/custom/path');
+    return new FileSystem( [
+        'base_directory'        => '/custom/path',
+        'directory_permissions' => '0770',
+        'file_permissions'      => '0660',
+    ] );
 });
 ```
 
