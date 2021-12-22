@@ -61,11 +61,15 @@ class QueryCache extends AbstractCache
     }
 
     function __action_do_graphql_request(
-        string $query,
+        ?string $query,
         $operation,
         $variables,
         $params
     ) {
+        if (empty($query)) {
+            return;
+        }
+        
         $user_id = get_current_user_id();
 
         $args_hash = empty($variables)
