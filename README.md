@@ -136,6 +136,18 @@ This is the default backend which writes the cache to
 `/tmp/wp-graphql-cache`. It not super fast but it can perform reasonably when
 backed by a RAM disk.
 
+### Transient
+
+This is cache storage backend which writes WordPress transients.
+
+This is a flexible cache storage backend as the true storage can be 
+configured at a platform level via the use of the object cache. By default 
+if no object cache is defined WordPress will store transients as options in
+the database. 
+
+For example a single server environment might use a APC object cache where as
+a HA environment might have a Memcached or Redis backend.
+
 ### OPCache
 
 TODO
