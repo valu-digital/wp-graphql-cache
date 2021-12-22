@@ -75,16 +75,9 @@ class FieldCache extends AbstractCache
 
     function __action_do_graphql_request(string $query, $operation_name)
     {
-        // Capture from operation name if available
-        if ($operation_name === $this->query_name) {
-            $this->query = $query;
-            return;
-        }
 
-        $current_query_name = Utils::get_query_name($query);
-        if ($current_query_name === $this->query_name) {
-            $this->query = $query;
-        }
+		$this->query = $query;
+
     }
 
     function __filter_graphql_pre_resolve_field(
@@ -98,6 +91,7 @@ class FieldCache extends AbstractCache
         $field,
         $field_resolver
     ) {
+
         // No query, no query name match
         if (!$this->query) {
             return $nil;
@@ -116,13 +110,22 @@ class FieldCache extends AbstractCache
         // Mark as mached ie. this field should be cached
         $this->match = true;
 
-        $query_name = Utils::sanitize($this->query_name);
         $field_name = Utils::sanitize($this->field_name);
         $args_hash = Utils::hash(Utils::stable_string($args));
-        $query_hash = Utils::hash($this->query);
         $user_id = get_current_user_id();
 
-        $this->key = "field-{$query_name}-${field_name}-${user_id}-{$query_hash}-${args_hash}";
+		if ( $this->query_name ) {
+			// If query name is configured, include the query hash in the cache key.
+
+			$query_name = Utils::sanitize($this->query_name);
+			$query_hash = Utils::hash($this->query);
+
+			$this->key = "field-${query_name}-${field_name}-${user_id}-${query_hash}-${args_hash}";
+		} else {
+			// If query name is not configured, do not include the query hash in the cache key.
+
+			$this->key = "field-${field_name}-${user_id}-${args_hash}";
+		}
 
         $this->read_cache();
 
